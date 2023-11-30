@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "includes.h": "c",
+        "shape_abstract.h": "c",
+        "app.h": "c",
+        "block_store.h": "c",
+        "block_process.h": "c",
+        "tetriminos_process.h": "c",
+        "tetris_logic_process.h": "c",
+        "serial_communication.h": "c",
+        "bsp_usart1.h": "c",
+        "string": "c",
+        "xstring": "c",
+        "xutility": "c",
+        "key_code.h": "c"
+    }
+}
