@@ -1,4 +1,4 @@
-#include "key_code.h"
+#include "key_code_communication.h"
 
 #define KMQ_SIZE 10
 OS_Q KeyMsgQueue;
@@ -22,7 +22,7 @@ void USART1_IRQHandler(void)
         // 读取接收到的数据
         uint8_t recv = USART_ReceiveData(USART1);
         
-        // 处理接收到的数据，你可以在这里添加你的逻辑
+        // 处理接收到的数据
         switch (fsm)
         {
         case HEAD:
@@ -38,7 +38,7 @@ void USART1_IRQHandler(void)
             fsm = TAIL;
             break;
         case TAIL:
-            if (recv == 0x0F)
+            if (recv == tail)
                 fsm = SEND;
             else
                 fsm = HEAD; // tail接收错误 这个Packet直接作废

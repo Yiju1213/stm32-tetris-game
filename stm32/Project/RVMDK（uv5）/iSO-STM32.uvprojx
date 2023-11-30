@@ -886,14 +886,19 @@
               <FilePath>..\..\User\app\tetriminos_process.c</FilePath>
             </File>
             <File>
-              <FileName>tetris_logic_process.c</FileName>
+              <FileName>key_code_communication.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\User\app\tetris_logic_process.c</FilePath>
+              <FilePath>..\..\User\app\key_code_communication.c</FilePath>
             </File>
             <File>
-              <FileName>key_code.c</FileName>
+              <FileName>tetris_game_process.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\User\app\key_code.c</FilePath>
+              <FilePath>..\..\User\app\tetris_game_process.c</FilePath>
+            </File>
+            <File>
+              <FileName>beihang.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\User\app\beihang.c</FilePath>
             </File>
           </Files>
         </Group>

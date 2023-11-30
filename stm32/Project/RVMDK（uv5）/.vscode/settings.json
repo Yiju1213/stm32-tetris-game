@@ -12,6 +12,11 @@
         "string": "c",
         "xstring": "c",
         "xutility": "c",
-        "key_code.h": "c"
+        "key_code.h": "c",
+        "static_gui.h": "c",
+        "tetris_render_process.h": "c",
+        "key_code_communication.h": "c",
+        "tetris_game_process.h": "c",
+        "beihang.h": "c"
     }
 }

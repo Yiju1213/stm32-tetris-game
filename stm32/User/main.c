@@ -20,15 +20,11 @@
 static OS_TCB AppTaskStartTCB;                           // 定义任务控制块
 static CPU_STK AppTaskStartStk[APP_TASK_START_STK_SIZE]; // 定义任务堆栈
 
-static OS_TCB AppTaskGameRenderTCB;
-static CPU_STK AppTaskGameRenderStk[APP_TASK_GAMERENDER_STK_SIZE];
-
 static OS_TCB  AppTaskGameLogicTCB;
 static CPU_STK AppTaskGameLogicStk[APP_TASK_GAMELOGIC_STK_SIZE];
 
 static void AppTaskStart(void *p_arg);
 static void AppTaskCreate(void);
-static void AppTaskGameRender(void *p_arg);
 
 /**
  * @brief  主函数
@@ -117,34 +113,18 @@ static void AppTaskStart(void *p_arg)
 
 /*
 *********************************************************************************************************
-*	函 数 名: AppTaskGameRender
-*	功能说明: 俄罗斯方块GUI界面渲染任务线程
-*	形    参：p_arg 是在创建该任务时传递的形参
-*	返 回 值: 无
-  优 先 级：7
-*********************************************************************************************************
-*/
-static void AppTaskGameRender(void *p_arg)
-{
-  (void)p_arg;
-  LCD_BK_EN;
-  ExecGameRender();
-}
-
-/*
-*********************************************************************************************************
 *	函 数 名: AppTaskGameLogic
 *	功能说明: 俄罗斯方块GUI游戏逻辑任务线程
 *	形    参：p_arg 是在创建该任务时传递的形参
 *	返 回 值: 无
-  优 先 级：6
+  优 先 级：3
 *********************************************************************************************************
 */
 static void AppTaskGameLogic(void *p_arg)
 {
   (void)p_arg;
   LCD_BK_EN;
-  ExecGameLogic();
+  ExecGame();
 }
 
 /*
@@ -158,20 +138,6 @@ static void AppTaskGameLogic(void *p_arg)
 static void AppTaskCreate(void)
 {
   OS_ERR err;
-  //
-  OSTaskCreate((OS_TCB *)&AppTaskGameRenderTCB,
-               (CPU_CHAR *)"Game Render Task",
-               (OS_TASK_PTR)AppTaskGameRender,
-               (void *)0,
-               (OS_PRIO)APP_TASK_GAMERENDER_PRIO,
-               (CPU_STK *)&AppTaskGameRenderStk[0],
-               (CPU_STK_SIZE)APP_TASK_GAMERENDER_STK_SIZE / 10,
-               (CPU_STK_SIZE)APP_TASK_GAMERENDER_STK_SIZE,
-               (OS_MSG_QTY)0,
-               (OS_TICK)0,
-               (void *)0,
-               (OS_OPT)(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-               (OS_ERR *)&err);
   OSTaskCreate((OS_TCB *)&AppTaskGameLogicTCB,
                (CPU_CHAR *)"Game Logic Task",
                (OS_TASK_PTR)AppTaskGameLogic,

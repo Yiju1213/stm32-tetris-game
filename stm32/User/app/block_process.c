@@ -18,9 +18,9 @@ void DrawBlock(int len, int mar, int pixel_x, int pixel_y, GUI_COLOR color)
 }
 
 // 清除方块
-void ClearBlock(int len, int pixel_x, int pixel_y)
+void ClearBlock(int len, int mar, int pixel_x, int pixel_y)
 {
-	GUI_ClearRect(pixel_x, pixel_y, pixel_x + len - 1, pixel_y + len - 1);
+	GUI_ClearRect(pixel_x + mar, pixel_y + mar, pixel_x + len - 1 - mar, pixel_y + len - 1 - mar);
 }
 
 

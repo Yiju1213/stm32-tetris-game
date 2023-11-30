@@ -1,7 +1,119 @@
-#include "tetris_logic_process.h"
+#include "tetris_game_process.h"
 #include "tetriminos_process.h"
+#include "beihang.h"
 #include "block_process.h"
 
+void MapFromGameZoneToPixel(int block_x, int block_y, int *pixel_x, int *pixel_y);
+int Scores = 0;
+
+/********************* 静态GUI框架 ↓ *************************/
+
+void DrawBeihang(void);
+void DrawPreviewArea(void);
+void DrawScoreArea(void);
+void DrawFinishLine(void);
+
+void GameOnInterface(int len, int mar)
+{
+  int p_x, p_y;
+  // 清除当前版面
+  GUI_Clear();
+  // 边框
+  for (p_x = 0; p_x < SCREEN_WIDTH; p_x += len)
+  {
+    DrawBlock(len, mar, p_x, 0, GUI_WHITE);
+    DrawBlock(len, mar, p_x, (SCREEN_HEIGHT / len - 1) * len, GUI_WHITE);
+    if (p_x > 160)
+    {
+      DrawBlock(len, mar, p_x, 70, GUI_WHITE);
+      DrawBlock(len, mar, p_x, 195, GUI_WHITE);
+    }
+  }
+  for (p_y = 0; p_y < SCREEN_HEIGHT; p_y += len)
+  {
+    DrawBlock(len, mar, 0, p_y, GUI_WHITE);
+    DrawBlock(len, mar, (SCREEN_WIDTH / len - 1) * len, p_y, GUI_WHITE);
+    DrawBlock(len, mar, (160 / len + 1) * len, p_y, GUI_WHITE);
+  }
+  // 右侧上方校徽区
+  DrawBeihang();
+  // 右侧中间预览区
+  DrawPreviewArea();
+  // 右侧下方得分区
+  DrawScoreArea();
+  // 画出结束线
+  DrawFinishLine();
+}
+
+void DrawBeihang(void)
+{
+  // 创建GUI_BITMAP结构
+  GUI_BITMAP bitmap;
+
+  // 设置图像大小和颜色格式
+  bitmap.XSize = 65;
+  bitmap.YSize = 65;
+  bitmap.pData = (U8 *)gImage_beihang; // 图片数据
+  bitmap.pPal = NULL;                  // 如果有调色板，可以设置
+  bitmap.BitsPerPixel = 24;
+  bitmap.pMethods = GUI_DRAW_BMP24;
+  bitmap.BytesPerLine = 3 * 65; // 16位图像，每像素占3字节
+  GUI_DrawBitmap(&bitmap, 170, 5);
+}
+
+void DrawScoreArea()
+{
+  // 在区域下方绘制标题 "Tips Area"
+  GUI_SetFont(&GUI_Font16B_ASCII);
+  GUI_DispStringHCenterAt("Score", 202, 215);
+  GUI_DispStringHCenterAt("0", 202, 255);
+}
+
+void DrawPreviewArea()
+{
+  // 在区域下方绘制标题 "Tips Area"
+  GUI_SetFont(&GUI_Font16B_ASCII);
+  GUI_DispStringHCenterAt("Preview", 202, 90);
+}
+
+void DrawFinishLine()
+{
+  int p_x = 0, p_y = 4;
+  MapFromGameZoneToPixel(0, 4, &p_x, &p_y);
+
+  GUI_SetLineStyle(GUI_LS_DASHDOTDOT);
+  GUI_SetColor(GUI_WHITE);
+  GUI_SetPenSize(3);
+  GUI_DrawHLine(p_y, p_x, p_x + GM_COL * STD_BLOCK_LEN);
+}
+
+void GameOverInterface(void)
+{
+  char str[20];
+  //
+  GUI_Clear();
+  //
+  GUI_SetTextAlign(GUI_TA_HCENTER);
+  GUI_SetFont(&GUI_Font24B_ASCII);
+  GUI_SetColor(GUI_RED);
+  GUI_DispStringAt("Game Over", 120, 100);
+  //
+  GUI_SetTextAlign(GUI_TA_HCENTER);
+  GUI_SetFont(&GUI_Font16B_ASCII);
+  GUI_SetColor(GUI_YELLOW);
+  sprintf(str, "Your Score is: %d", Scores);
+  GUI_DispStringAt(str, 120, 160);
+  //
+  GUI_SetTextAlign(GUI_TA_HCENTER);
+  GUI_SetFont(&GUI_Font16B_ASCII);
+  GUI_SetColor(GUI_WHITE);
+  GUI_DispStringAt("Press \"space\" to Re-play", 120, 200);
+  //
+  Scores = 0;
+}
+/********************* 静态GUI框架 ↑ *************************/
+
+/********************* 动态逻辑 ↓ *************************/
 // 游戏区域（用于记录静态的方块）
 struct _GameZone
 {
@@ -42,36 +154,40 @@ void MapFromGameZoneToPixel(int block_x, int block_y, int *pixel_x, int *pixel_y
 }
 
 // 后台删除一行的数据
-void ClearOneRow(int row)
+void ClearOneRowData(int row)
 {
   int block_x, block_y = row;
-  // int pixel_x, pixel_y;
 
   for (block_x = 0; block_x < GM_COL; ++block_x)
   {
     GameZone.data[block_y][block_x] = 0;
-    // MapFromGameZoneToPixel(block_x, block_y, &pixel_x, &pixel_y);
-    // ClearBlock(CurrentT.len, pixel_x, pixel_y);
   }
 }
 
-// 后台转移一行数据 前台渲染一行数据
-void HighlightRowsBlocks(uint8_t *row_arr)
+// 前台高亮一行方块
+void HighlightOneRowGUI(int row)
 {
   int block_x, block_y;
   int pixel_x, pixel_y;
-  int stay_ms = 500;
+  block_y = row;
+  for (block_x = 0; block_x < GM_COL; ++block_x)
+  {
+    MapFromGameZoneToPixel(block_x, block_y, &pixel_x, &pixel_y);
+    DrawBlock(STD_BLOCK_LEN, STD_BLOCK_MAR, pixel_x, pixel_y, GUI_WHITE);
+  }
+}
 
+// 前台渲染要被清除的行数据
+void HighlightRowsToBeClearGUI(uint8_t *row_arr)
+{
+  int block_y;
+  int stay_ms = 100;
   GUI_Delay(stay_ms);
-  for (block_y = 0; block_y < GM_ROW; ++ block_y)
+  for (block_y = 0; block_y < GM_ROW; ++block_y)
   {
     if (row_arr[block_y] == 1)
     {
-      for (block_x = 0; block_x < GM_COL; ++block_x)
-      {
-        MapFromGameZoneToPixel(block_x, block_y, &pixel_x, &pixel_y);
-        DrawBlock(STD_BLOCK_LEN, STD_BLOCK_MAR, pixel_x, pixel_y, GUI_WHITE);
-      }
+      HighlightOneRowGUI(block_y);
     }
   }
   GUI_Delay(stay_ms);
@@ -86,13 +202,13 @@ void InitStartingTetriminos(void)
 
 void UpdateNextTetriminoInPreviewArea()
 {
-  GUI_ClearRect(173, 90, 233, 150);
+  GUI_ClearRect(PV_X_START, PV_Y_START, PV_X_END, PV_Y_END);
   DrawTetriminos(NextT.body, NextT.len, NextT.mar, NextT.p_x, NextT.p_y, NextT.color);
 }
 
 void UpdateCurrentTetriminoInGameZone(int block_step_x, int block_step_y, int rotate_times)
 {
-  ClearTetriminos(CurrentT.body, CurrentT.len, CurrentT.p_x, CurrentT.p_y);
+  ClearTetriminos(CurrentT.body, CurrentT.len, CurrentT.mar, CurrentT.p_x, CurrentT.p_y);
   CurrentT.p_x += block_step_x * CurrentT.len;
   CurrentT.p_y += block_step_y * CurrentT.len;
 
@@ -184,17 +300,17 @@ void SwitchNextTetrimino(void)
   NextT.color = GetTetrisColor(NextT.shape);
   NextT.len = STD_BLOCK_LEN;
   NextT.mar = STD_BLOCK_MAR;
-  NextT.p_x = PREVIEW_RENDER_X; // 在预览区生成
-  NextT.p_y = PREVIEW_RENDER_Y;
+  NextT.p_x = PV_X_START; // 在预览区生成
+  NextT.p_y = PV_Y_START;
 }
 
 // 清除满行并更新游戏区域
 void ClearFullRowsAndUpdateGameZone(void)
 {
   uint8_t full_flag[GM_ROW];
-  int block_y, block_x; 
+  int block_y, block_x;
   int cnt_rows = 0;
-  // 1. 从底部按行寻找 找到了直接删除数据 
+  // 1. 从底部按行寻找 找到了直接删除数据
   for (block_y = GM_ROW - 1; block_y >= 0; --block_y)
   {
     full_flag[block_y] = 1;
@@ -209,7 +325,10 @@ void ClearFullRowsAndUpdateGameZone(void)
     }
     // 如果行满 直接在后台上清除
     if (full_flag[block_y] == 1)
-      ClearOneRow(block_y);
+    {
+      ClearOneRowData(block_y);
+      Scores += 10;
+    }
   }
   // 2. 下坠操作(以行为单位向下移动一个单位)
   for (block_y = GM_ROW - 1; block_y >= 0; --block_y)
@@ -225,16 +344,64 @@ void ClearFullRowsAndUpdateGameZone(void)
       {
         Mem_Copy(&(GameZone.data[block_y + cnt_rows][0]), &(GameZone.data[block_y][0]), GM_COL * sizeof(uint8_t));
         Mem_Copy(&(GameZone.color[block_y + cnt_rows][0]), &(GameZone.color[block_y][0]), GM_COL * sizeof(int));
-        ClearOneRow(block_y);
+        ClearOneRowData(block_y);
       }
     }
   }
 
-  HighlightRowsBlocks(full_flag);
-  RefreshGameZone();
+  HighlightRowsToBeClearGUI(full_flag);
+  RefreshGameZoneGUI();
 }
 
-// 测试行清除功能
+// 刷新整个游戏界面
+void RefreshGameZoneGUI(void)
+{
+  int map_px, map_py, y, x;
+  GUI_ClearRect(5, 5, 165, 315);
+  GUI_Delay(100);
+  for (y = 0; y < GM_ROW; ++y)
+  {
+    for (x = 0; x < GM_COL; ++x)
+    {
+      if (GameZone.data[y][x] == 1)
+      {
+        MapFromGameZoneToPixel(x, y, &map_px, &map_py);
+        DrawBlock(CurrentT.len, CurrentT.mar, map_px, map_py, GameZone.color[y][x]);
+      }
+    }
+  }
+  DrawFinishLine(); // GUI_ClearRect会清除掉
+  GUI_Delay(100);
+}
+
+// 清除当前游戏区域数据（GameOver下调用）
+void RefreshGameZoneData(void)
+{
+  int y, x;
+  for (y = 0; y < GM_ROW; ++y)
+    for (x = 0; x < GM_COL; ++x)
+      GameZone.data[y][x] = 0;
+}
+
+int CheckIfGameOver(void)
+{
+  int block_y, block_x;
+  MapFromPixelToGameZone(CurrentT.p_x, CurrentT.p_y, &block_x, &block_y);
+
+  // 检查高四行（FinishLine上方）是否已经被占据
+  for (block_y = 0; block_y < 4; ++block_y)
+  {
+    for (block_x = 0; block_x < GM_COL; ++block_x)
+    {
+      if (GameZone.data[block_y][block_x] == 1)
+        return 1;
+    }
+  }
+
+  return 0;
+}
+
+// 测试行清除功能 不用管
 void Test_ImplementGameZoneForFullRowClear(void)
 {
   int block_x, test_row, rand_empty_x;
@@ -254,24 +421,14 @@ void Test_ImplementGameZoneForFullRowClear(void)
     }
   }
 
-  RefreshGameZone();
+  RefreshGameZoneGUI();
 }
 
-void RefreshGameZone(void)
+void UpdateScoresGUI(void)
 {
-  int map_px, map_py, y, x;
-  GUI_ClearRect(5, 5, 165, 315);
-  GUI_Delay(500);
-  for (y = 0; y < GM_ROW; ++y)
-  {
-    for (x = 0; x < GM_COL; ++x)
-    {
-      if (GameZone.data[y][x] == 1)
-      {
-        MapFromGameZoneToPixel(x, y, &map_px, &map_py);
-        DrawBlock(CurrentT.len, CurrentT.mar, map_px, map_py, GameZone.color[y][x]);
-      }
-    }
-  }
-  GUI_Delay(500);
-}
+  char str[10];
+  GUI_SetFont(&GUI_Font16B_ASCII);
+  GUI_SetColor(GUI_WHITE);
+  sprintf(str, "%d", Scores);
+  GUI_DispStringHCenterAt(str, 202, 255);
+} 

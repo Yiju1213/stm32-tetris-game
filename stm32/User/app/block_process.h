@@ -18,7 +18,7 @@ void CalculateBlockCoordinates(int len, int i, int j, int *x, int *y);
 void DrawBlock(int len, int mar, int pixel_x, int pixel_y, GUI_COLOR color);
 
 // 清除方块
-void ClearBlock(int len, int pixel_x, int pixel_y);
+void ClearBlock(int len, int mar, int pixel_x, int pixel_y);
 
 // 在屏幕上绘制所有方块
 void Test_DrawBlocksOnWholeScreen(GUI_COLOR color);

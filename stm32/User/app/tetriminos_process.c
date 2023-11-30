@@ -90,16 +90,14 @@ int DrawTetriminos(struct _TetrisForm* body, int len, int mar, int pixel_x, int 
   {
     for (x = 0; x < 4; ++x)
     {
-      // printf("%d ", body->space[y][x]);
       if (body->space[y][x] == 1)
         DrawBlock(len, mar, pixel_x + x * len, pixel_y + y * len, color);
     }
-    // printf("\n");
   }
   return 0;
 }
 
-int ClearTetriminos(struct _TetrisForm* body, int len, int pixel_x, int pixel_y)
+int ClearTetriminos(struct _TetrisForm* body, int len, int mar, int pixel_x, int pixel_y)
 {
   int x, y;
   for (y = 0; y < 4; ++y)
@@ -107,7 +105,7 @@ int ClearTetriminos(struct _TetrisForm* body, int len, int pixel_x, int pixel_y)
     for (x = 0; x < 4; ++x)
     {
       if (body->space[y][x] == 1)
-        ClearBlock(len, pixel_x + x * len, pixel_y + y * len);
+        ClearBlock(len, mar, pixel_x + x * len, pixel_y + y * len);
     }
   }
   return 0;
@@ -151,10 +149,7 @@ void Test_ShowAllTetriminosInPreviewArea(void)
       GUI_COLOR color = GetTetrisColor(shape);
       DrawTetriminos(body, STD_BLOCK_LEN, STD_BLOCK_MAR, 183, 100, color);
       GUI_Delay(500);
-      ClearTetriminos(body, STD_BLOCK_LEN, 183, 100);
+      ClearTetriminos(body, STD_BLOCK_LEN, STD_BLOCK_MAR, 183, 100);
     }
   }
-  // struct _TetrisForm *body = GetTetriminos(0, 0);
-  // GUI_COLOR color = GetTetrisColor(0);
-  // DrawTetriminos(body, STD_BLOCK_LEN, STD_BLOCK_MAR, 183, 100, color);
 }

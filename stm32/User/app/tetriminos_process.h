@@ -19,7 +19,7 @@ GUI_COLOR GetTetrisColor(int shape_index);
 int DrawTetriminos(struct _TetrisForm* body, int len, int mar, int pixel_x, int pixel_y, GUI_COLOR color);
 
 // 清除俄罗斯方块的形状块
-int ClearTetriminos(struct _TetrisForm* body, int len, int pixel_x, int pixel_y);
+int ClearTetriminos(struct _TetrisForm* body, int len, int mar, int pixel_x, int pixel_y);
 
 // 获得某一个特定的形状块
 struct _TetrisForm* GetTetriminos(int shape, int form);

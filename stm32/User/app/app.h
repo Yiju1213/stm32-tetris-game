@@ -6,8 +6,6 @@
 *                                         FUNCTION PROTOTYPES
 *********************************************************************************************************
 */
-void ExecGameRender(void);
-
-void ExecGameLogic(void);
+void ExecGame(void);
 
 #endif	//_APP_H_

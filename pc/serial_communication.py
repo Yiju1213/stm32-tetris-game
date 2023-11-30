@@ -77,7 +77,7 @@ class TetrisController:
         try:
             print("Tetris Controller is running. Press 'q' to quit.")
             while True:
-                self.recv()
+                self.recv() 
                 time.sleep(1/30)  # 控制刷新频率
         except KeyboardInterrupt:
             pass

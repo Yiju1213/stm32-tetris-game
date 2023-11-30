@@ -48,8 +48,7 @@
 */
 
 #define  APP_TASK_START_PRIO                    2u
-#define  APP_TASK_GAMELOGIC_PRIO                6u
-#define  APP_TASK_GAMERENDER_PRIO               7u
+#define  APP_TASK_GAMELOGIC_PRIO                3u
 
 /*
 *********************************************************************************************************
@@ -58,8 +57,7 @@
 *********************************************************************************************************
 */
 
-#define  APP_TASK_START_STK_SIZE                128u      
-#define  APP_TASK_GAMERENDER_STK_SIZE           128u    
+#define  APP_TASK_START_STK_SIZE                128u     
 #define   APP_TASK_GAMELOGIC_STK_SIZE           128u
 
 
