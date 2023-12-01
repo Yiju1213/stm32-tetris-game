@@ -1,3 +1,4 @@
 # ignore output and listing
 /stm32/Output/*
 /stm32/Listing/*
+/pc/build/*
